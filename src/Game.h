@@ -17,6 +17,7 @@ public:
     std::vector<Bullet*> bullets;
     void Draw() const;
     void Update(float deltaTime);
+    Music themeSound;
     ~Game();
 };
 

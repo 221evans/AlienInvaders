@@ -4,6 +4,9 @@
 
 #include "Bullet.h"
 
+#include <iostream>
+#include <ostream>
+
 Bullet::Bullet(float pX, float pY) {
     bulletTexture = LoadTexture("Assets/sprites.png");
     srcRect = {896.0, 256.0, 64, 64};
@@ -23,6 +26,12 @@ void Bullet::Update(float deltaTime) {
     destRect.x = posX;
     destRect.y = posY;
     posY -= speed * deltaTime;
+
+    if (posY <= 0) {
+        isDead = true;
+    }
+
+
 }
 
 Bullet::~Bullet() {

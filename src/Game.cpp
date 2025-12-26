@@ -3,9 +3,10 @@
 //
 
 #include "Game.h"
-
+#include "iostream"
 Game::Game() {
-
+    InitAudioDevice();
+    themeSound = LoadMusicStream("Assets/titlebattle.wav");
 }
 
 void Game::Draw() const {
@@ -17,6 +18,14 @@ void Game::Draw() const {
 }
 
 void Game::Update(float deltaTime) {
+
+
+    if (!IsMusicStreamPlaying(themeSound)) {
+        PlayMusicStream(themeSound);
+    }
+
+    UpdateMusicStream(themeSound);
+
     player.Update(deltaTime);
 
     if (IsKeyPressed(KEY_SPACE)) {
@@ -26,6 +35,18 @@ void Game::Update(float deltaTime) {
     for (auto* bullet : bullets) {
         bullet->Update(deltaTime);
     }
+
+    // Remove dead bullets
+    std::erase_if(bullets,
+                  [](const Bullet* bullet) {
+                      if (bullet->isDead) {
+                          delete bullet;  // Free memory
+                          return true;    // Mark for removal
+                      }
+                      return false;
+                  });
+
+        std::cout << "bullet count" << bullets.size() << std::endl;
 }
 
 Game::~Game() {
