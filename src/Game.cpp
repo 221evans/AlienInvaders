@@ -12,9 +12,13 @@ Game::Game() {
 
     InitAudioDevice();
     themeSound = LoadMusicStream("Assets/titlebattle.wav");
+    hitSound = LoadSound("Assets/hit.wav");
     alienDirection = 1.0f;
     alienShootTime = 0.0f;
     alienShootDelay = 1.0f;
+    playerShootTimer = 0.0f;
+    playerShootDelay = 1.0f;
+    canPlayerShoot = true;
 
     for (int row = 0; row < 5; row++) {
         for (int col = 0; col < 10; col++) {
@@ -69,9 +73,25 @@ void Game::Update(float deltaTime) {
         DrawText(("Player Lives: " + std::to_string(player->lives)).c_str(), 10, 10, 20, RED );
         player->Update(deltaTime);
 
-        if (IsKeyPressed(KEY_SPACE)) {
+        if (IsKeyPressed(KEY_SPACE) && canPlayerShoot) {
+
             playerBullets.push_back(std::make_unique<Bullet>(player->posX, player->posY, -1.0f));
+
+            canPlayerShoot = false;
         }
+
+        // player shoot timer
+        if (!canPlayerShoot) {
+
+            playerShootTimer += deltaTime;
+
+            if (playerShootTimer >= playerShootDelay) {
+                canPlayerShoot = true;
+                playerShootTimer = 0.0f;
+            }
+        }
+
+
 
         if (player->lives <= 0) {
             player->isDead = true;
@@ -86,58 +106,20 @@ void Game::Update(float deltaTime) {
         bullet->Update(deltaTime);
     }
 
-    // Collision detection with bullet and alien
-    for (auto& bullet : playerBullets) {
-        for (auto& alien : aliens) {
-            if (CheckCollisionRecs(bullet->destRect, alien->destRect)) {
-                bullet->isDead = true;
-                alien->isDead = true;
-            }
-        }
-    }
-
-    // Collision detection with alien bullets and player
-    for (auto& bullet : alienBullets) {
-
-        for (auto& player : newPlayer) {
-            if (CheckCollisionRecs(bullet->destRect, player->destRect)) {
-                bullet->isDead = true;
-                player->lives -= 1;
-            }
-        }
-    }
+    HandleCollision();
 
     if (newPlayer.empty()) {
         DrawText("Game Over", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
     }
 
 
-
-
     if (!IsMusicStreamPlaying(themeSound)) {
         PlayMusicStream(themeSound);
     }
 
+
     UpdateMusicStream(themeSound);
-
-    std::erase_if(playerBullets, [](const auto& bullet) {
-        return bullet->isDead;
-    });
-
-    std::erase_if(alienBullets, [](const auto& bullet) {
-        return bullet->isDead;
-    });
-
-    std::erase_if(aliens, [](const auto& alien) {
-        return alien->isDead;
-    });
-
-    std::erase_if(newPlayer, [](const auto& player) {
-        return player->isDead;
-    });
-
-
-
+    HandleDeletion();
 
     unsigned enemyCount = aliens.size();
 
@@ -151,6 +133,7 @@ void Game::Update(float deltaTime) {
 
 Game::~Game() {
     UnloadMusicStream(themeSound);
+    UnloadSound(hitSound);
 }
 
 void Game::UpdateAlien(float deltaTime) {
@@ -167,4 +150,49 @@ void Game::UpdateAlien(float deltaTime) {
         alienDirection *= -1;
     }
 
+}
+
+void Game::HandleDeletion() {
+
+    std::erase_if(playerBullets, [](const auto& bullet) {
+      return bullet->isDead;
+  });
+
+    std::erase_if(alienBullets, [](const auto& bullet) {
+        return bullet->isDead;
+    });
+
+    std::erase_if(aliens, [](const auto& alien) {
+        return alien->isDead;
+    });
+
+    std::erase_if(newPlayer, [](const auto& player) {
+        return player->isDead;
+    });
+}
+
+void Game::HandleCollision() const {
+
+    // Collision detection with bullet and alien
+    for (auto& bullet : playerBullets) {
+        for (auto& alien : aliens) {
+            if (CheckCollisionRecs(bullet->destRect, alien->destRect)) {
+                bullet->isDead = true;
+                alien->isDead = true;
+                PlaySound(hitSound);
+            }
+        }
+    }
+
+    // Collision detection with alien bullets and player
+    for (auto& bullet : alienBullets) {
+
+        for (auto& player : newPlayer) {
+            if (CheckCollisionRecs(bullet->destRect, player->destRect)) {
+                bullet->isDead = true;
+                player->lives -= 1;
+                PlaySound(hitSound);
+            }
+        }
+    }
 }

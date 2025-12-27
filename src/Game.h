@@ -22,14 +22,20 @@ public:
     std::vector<std::unique_ptr<Alien>> aliens;
     void Draw() const;
     void Update(float deltaTime);
-    Music themeSound;
+    Music themeSound{};
+    Sound hitSound;
     float alienDirection;
     ~Game();
 
 private:
     void UpdateAlien(float deltaTime);
+    void HandleDeletion();
+    void HandleCollision() const;
     float alienShootTime;
     float alienShootDelay;
+    float playerShootTimer;
+    float playerShootDelay;
+    bool canPlayerShoot;
 };
 
 
