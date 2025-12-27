@@ -12,13 +12,16 @@ Game::Game() {
 void Game::Draw() const {
     player.Draw();
 
-    for (auto* bullet : bullets) {
+    for (const auto& bullet : bullets) {
         bullet->Draw();
     }
 }
 
 void Game::Update(float deltaTime) {
 
+    for (auto& bullet : bullets) {
+        bullet->Update(deltaTime);
+    }
 
     if (!IsMusicStreamPlaying(themeSound)) {
         PlayMusicStream(themeSound);
@@ -29,25 +32,16 @@ void Game::Update(float deltaTime) {
     player.Update(deltaTime);
 
     if (IsKeyPressed(KEY_SPACE)) {
-        bullets.push_back(new Bullet(player.posX, player.posY));
+        bullets.push_back(std::make_unique<Bullet>(player.posX, player.posY));
     }
 
-    for (auto* bullet : bullets) {
-        bullet->Update(deltaTime);
-    }
+    std::cout << "bullet count " << bullets.size() << std::endl;
 
-    // Remove dead bullets
-    std::erase_if(bullets,
-                  [](const Bullet* bullet) {
-                      if (bullet->isDead) {
-                          delete bullet;  // Free memory
-                          return true;    // Mark for removal
-                      }
-                      return false;
-                  });
-
-        std::cout << "bullet count" << bullets.size() << std::endl;
+    std::erase_if(bullets, [](const auto& bullet) {
+        return bullet->isDead;
+    });
 }
+
 
 Game::~Game() {
 

@@ -4,6 +4,7 @@
 
 #ifndef TOYBOXJAM_GAME_H
 #define TOYBOXJAM_GAME_H
+#include <memory>
 #include <raylib.h>
 #include <vector>
 
@@ -14,7 +15,7 @@ class Game {
 public:
     Game();
     Player player;
-    std::vector<Bullet*> bullets;
+    std::vector<std::unique_ptr<Bullet>> bullets;
     void Draw() const;
     void Update(float deltaTime);
     Music themeSound;
