@@ -12,6 +12,8 @@ public:
     Player();
     float posX;
     float posY;
+    int lives;
+    bool isDead;
     Rectangle srcRect{};
     Rectangle destRect{};
     Texture2D playerTexture{};
@@ -24,6 +26,7 @@ private:
 public:
     void Draw() const;
     void Update(float deltaTime);
+
 };
 
 

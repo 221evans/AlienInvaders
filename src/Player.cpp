@@ -12,6 +12,8 @@ Player::Player() {
     playerTexture = LoadTexture("Assets/sprites.png");
     origin = {0,0};
     speed = 100.0;
+    lives = 3;
+    isDead = false;
 }
 
 void Player::Draw() const {

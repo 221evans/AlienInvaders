@@ -16,7 +16,7 @@
 class Game {
 public:
     Game();
-    Player player;
+    std::vector<std::unique_ptr<Player>> player;
     std::vector<std::unique_ptr<Bullet>> playerBullets;
     std::vector<std::unique_ptr<Bullet>> alienBullets;
     std::vector<std::unique_ptr<Alien>> aliens;

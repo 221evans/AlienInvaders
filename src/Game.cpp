@@ -21,10 +21,15 @@ Game::Game() {
             aliens.push_back(std::make_unique<Alien>(col * 40 + 50, row * 40 + 50));
         }
     }
+
+    player.push_back(std::make_unique<Player>());
 }
 
 void Game::Draw() const {
-    player.Draw();
+
+    for (const auto& player : player) {
+        player->Draw();
+    }
 
     for (const auto& bullet : playerBullets) {
         bullet->Draw();
@@ -60,6 +65,19 @@ void Game::Update(float deltaTime) {
 
     }
 
+    for (auto& player : player) {
+        DrawText(("Player Lives: " + std::to_string(player->lives)).c_str(), 10, 10, 20, RED );
+        player->Update(deltaTime);
+
+        if (IsKeyPressed(KEY_SPACE)) {
+            playerBullets.push_back(std::make_unique<Bullet>(player->posX, player->posY, -1.0f));
+        }
+
+        if (player->lives <= 0) {
+            player->isDead = true;
+        }
+    }
+
     for (auto& bullet : playerBullets) {
         bullet->Update(deltaTime);
     }
@@ -80,11 +98,17 @@ void Game::Update(float deltaTime) {
 
     // Collision detection with alien bullets and player
     for (auto& bullet : alienBullets) {
-        if (CheckCollisionRecs(bullet->destRect, player.destRect)) {
-            bullet->isDead = true;
-            // player.isDead = true; to be added
+
+        for (auto& player : player) {
+            if (CheckCollisionRecs(bullet->destRect, player->destRect)) {
+                bullet->isDead = true;
+                player->lives -= 1;
+            }
         }
     }
+
+
+
 
     if (!IsMusicStreamPlaying(themeSound)) {
         PlayMusicStream(themeSound);
@@ -92,11 +116,10 @@ void Game::Update(float deltaTime) {
 
     UpdateMusicStream(themeSound);
 
-    player.Update(deltaTime);
 
-    if (IsKeyPressed(KEY_SPACE)) {
-        playerBullets.push_back(std::make_unique<Bullet>(player.posX, player.posY, -1.0f));
-    }
+
+
+
 
 
     std::erase_if(playerBullets, [](const auto& bullet) {
@@ -110,6 +133,13 @@ void Game::Update(float deltaTime) {
     std::erase_if(aliens, [](const auto& alien) {
         return alien->isDead;
     });
+
+    std::erase_if(player, [](const auto& player) {
+        return player->isDead;
+    });
+
+
+
 
     unsigned enemyCount = aliens.size();
 
