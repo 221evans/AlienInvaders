@@ -26,6 +26,7 @@ public:
 
 private:
     void UpdateAlien(float deltaTime);
+
 };
 
 

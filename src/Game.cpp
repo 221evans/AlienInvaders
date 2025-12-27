@@ -8,16 +8,16 @@
 
 #include "iostream"
 Game::Game() {
+
     InitAudioDevice();
     themeSound = LoadMusicStream("Assets/titlebattle.wav");
+    alienDirection = 1.0;
 
     for (int row = 0; row < 5; row++) {
         for (int col = 0; col < 10; col++) {
             aliens.push_back(std::make_unique<Alien>(col * 40 + 50, row * 40 + 50));
         }
     }
-
-    alienDirection = 1.0;
 }
 
 void Game::Draw() const {
