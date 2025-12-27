@@ -7,7 +7,7 @@
 #include <iostream>
 #include <ostream>
 
-Bullet::Bullet(float pX, float pY) {
+Bullet::Bullet(float pX, float pY, float dir) {
     bulletTexture = LoadTexture("Assets/sprites.png");
     srcRect = {896.0, 256.0, 64, 64};
     destRect = {-100, -100, 32, 32};
@@ -16,6 +16,7 @@ Bullet::Bullet(float pX, float pY) {
     isDead = false;
     posX = pX;
     posY = pY;
+    direction = dir;
 }
 
 void Bullet::Draw() const {
@@ -25,11 +26,14 @@ void Bullet::Draw() const {
 void Bullet::Update(float deltaTime) {
     destRect.x = posX;
     destRect.y = posY;
-    posY -= speed * deltaTime;
+    posY += direction * speed * deltaTime;
 
-    if (posY <= 0) {
+    if (posY <= 0.0 || posY >= 450.0f) {
         isDead = true;
     }
+
+
+
 
 
 }

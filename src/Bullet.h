@@ -9,7 +9,7 @@
 
 class Bullet {
 public:
-    Bullet(float posX, float posY);
+    Bullet(float posX, float posY, float dir);
     Texture2D bulletTexture{};
     Rectangle srcRect{};
     Rectangle destRect{};
@@ -17,6 +17,7 @@ public:
     float speed;
     float posX;
     float posY;
+    float direction;
     bool isDead;
 
 

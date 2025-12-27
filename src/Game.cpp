@@ -7,11 +7,14 @@
 #include <algorithm>
 
 #include "iostream"
+
 Game::Game() {
 
     InitAudioDevice();
     themeSound = LoadMusicStream("Assets/titlebattle.wav");
-    alienDirection = 1.0;
+    alienDirection = 1.0f;
+    alienShootTime = 0.0f;
+    alienShootDelay = 1.0f;
 
     for (int row = 0; row < 5; row++) {
         for (int col = 0; col < 10; col++) {
@@ -23,7 +26,11 @@ Game::Game() {
 void Game::Draw() const {
     player.Draw();
 
-    for (const auto& bullet : bullets) {
+    for (const auto& bullet : playerBullets) {
+        bullet->Draw();
+    }
+
+    for (const auto& bullet : alienBullets) {
         bullet->Draw();
     }
 
@@ -36,17 +43,46 @@ void Game::Update(float deltaTime) {
 
     UpdateAlien(deltaTime);
 
-    for (auto& bullet : bullets) {
+    alienShootTime += deltaTime;
+    if (alienShootTime >= alienShootDelay) {
+        alienShootTime = 0.0f;
+
+
+        if (!aliens.empty()) {
+            int randomIndex = GetRandomValue(0, aliens.size() - 1);
+            alienBullets.push_back(std::make_unique<Bullet>(
+                aliens[randomIndex]->posX,
+                aliens[randomIndex]->posY,
+                1.0f
+                ));
+
+        }
+
+    }
+
+    for (auto& bullet : playerBullets) {
+        bullet->Update(deltaTime);
+    }
+
+    for (auto& bullet : alienBullets) {
         bullet->Update(deltaTime);
     }
 
     // Collision detection with bullet and alien
-    for (auto& bullet : bullets) {
+    for (auto& bullet : playerBullets) {
         for (auto& alien : aliens) {
             if (CheckCollisionRecs(bullet->destRect, alien->destRect)) {
                 bullet->isDead = true;
                 alien->isDead = true;
             }
+        }
+    }
+
+    // Collision detection with alien bullets and player
+    for (auto& bullet : alienBullets) {
+        if (CheckCollisionRecs(bullet->destRect, player.destRect)) {
+            bullet->isDead = true;
+            // player.isDead = true; to be added
         }
     }
 
@@ -59,11 +95,15 @@ void Game::Update(float deltaTime) {
     player.Update(deltaTime);
 
     if (IsKeyPressed(KEY_SPACE)) {
-        bullets.push_back(std::make_unique<Bullet>(player.posX, player.posY));
+        playerBullets.push_back(std::make_unique<Bullet>(player.posX, player.posY, -1.0f));
     }
 
 
-    std::erase_if(bullets, [](const auto& bullet) {
+    std::erase_if(playerBullets, [](const auto& bullet) {
+        return bullet->isDead;
+    });
+
+    std::erase_if(alienBullets, [](const auto& bullet) {
         return bullet->isDead;
     });
 
@@ -76,6 +116,8 @@ void Game::Update(float deltaTime) {
     if (enemyCount == 0) {
         DrawText("You Win!", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
     }
+
+    std::cout << "Bullet count " << alienBullets.size() << std::endl;
 }
 
 
@@ -89,7 +131,7 @@ void Game::UpdateAlien(float deltaTime) {
         alien->posX += alienDirection * alien->speed * deltaTime;
     }
 
-    bool hitEdge = std::any_of(aliens.begin(), aliens.end(), [](const auto& alien) {
+    const bool hitEdge = std::any_of(aliens.begin(), aliens.end(), [](const auto& alien) {
       return alien->posX <= 10 || alien->posX >= GetScreenWidth() - 40;
   });
 
