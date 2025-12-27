@@ -22,7 +22,7 @@ public:
 
 
 
-    void Draw() const;
+    void Draw(Color color) const;
     void Update(float deltaTime);
 
 

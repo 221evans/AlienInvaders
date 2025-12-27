@@ -19,8 +19,8 @@ Bullet::Bullet(float pX, float pY, float dir) {
     direction = dir;
 }
 
-void Bullet::Draw() const {
-    DrawTexturePro(bulletTexture, srcRect, destRect, origin, 0, WHITE);
+void Bullet::Draw(Color color) const {
+    DrawTexturePro(bulletTexture, srcRect, destRect, origin, 0, color);
 }
 
 void Bullet::Update(float deltaTime) {

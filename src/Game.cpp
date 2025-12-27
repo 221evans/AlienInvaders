@@ -22,21 +22,21 @@ Game::Game() {
         }
     }
 
-    player.push_back(std::make_unique<Player>());
+    newPlayer.push_back(std::make_unique<Player>());
 }
 
 void Game::Draw() const {
 
-    for (const auto& player : player) {
+    for (const auto& player : newPlayer) {
         player->Draw();
     }
 
     for (const auto& bullet : playerBullets) {
-        bullet->Draw();
+        bullet->Draw(WHITE);
     }
 
     for (const auto& bullet : alienBullets) {
-        bullet->Draw();
+        bullet->Draw(RED);
     }
 
     for (const auto& alien : aliens) {
@@ -65,7 +65,7 @@ void Game::Update(float deltaTime) {
 
     }
 
-    for (auto& player : player) {
+    for (auto& player : newPlayer) {
         DrawText(("Player Lives: " + std::to_string(player->lives)).c_str(), 10, 10, 20, RED );
         player->Update(deltaTime);
 
@@ -99,12 +99,16 @@ void Game::Update(float deltaTime) {
     // Collision detection with alien bullets and player
     for (auto& bullet : alienBullets) {
 
-        for (auto& player : player) {
+        for (auto& player : newPlayer) {
             if (CheckCollisionRecs(bullet->destRect, player->destRect)) {
                 bullet->isDead = true;
                 player->lives -= 1;
             }
         }
+    }
+
+    if (newPlayer.empty()) {
+        DrawText("Game Over", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
     }
 
 
@@ -115,12 +119,6 @@ void Game::Update(float deltaTime) {
     }
 
     UpdateMusicStream(themeSound);
-
-
-
-
-
-
 
     std::erase_if(playerBullets, [](const auto& bullet) {
         return bullet->isDead;
@@ -134,7 +132,7 @@ void Game::Update(float deltaTime) {
         return alien->isDead;
     });
 
-    std::erase_if(player, [](const auto& player) {
+    std::erase_if(newPlayer, [](const auto& player) {
         return player->isDead;
     });
 
