@@ -142,7 +142,7 @@ void Game::UpdateAlien(float deltaTime) {
         alien->posX += alienDirection * alien->speed * deltaTime;
     }
 
-    const bool hitEdge = std::any_of(aliens.begin(), aliens.end(), [](const auto& alien) {
+    const bool hitEdge = std::ranges::any_of(aliens, [](const auto& alien) {
       return alien->posX <= 10 || alien->posX >= GetScreenWidth() - 40;
   });
 
