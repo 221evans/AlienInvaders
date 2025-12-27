@@ -8,6 +8,7 @@
 #include <raylib.h>
 #include <vector>
 
+#include "Alien.h"
 #include "Player.h"
 #include "Bullet.h"
 
@@ -16,10 +17,15 @@ public:
     Game();
     Player player;
     std::vector<std::unique_ptr<Bullet>> bullets;
+    std::vector<std::unique_ptr<Alien>> aliens;
     void Draw() const;
     void Update(float deltaTime);
     Music themeSound;
+    float alienDirection;
     ~Game();
+
+private:
+    void UpdateAlien(float deltaTime);
 };
 
 

@@ -35,5 +35,5 @@ void Bullet::Update(float deltaTime) {
 }
 
 Bullet::~Bullet() {
-
+    UnloadTexture(bulletTexture);
 }

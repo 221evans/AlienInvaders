@@ -32,7 +32,7 @@ void Player::Update(float deltaTime) {
 }
 
 Player::~Player() {
-
+    UnloadTexture(playerTexture);
 }
 
 
