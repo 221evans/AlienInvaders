@@ -40,7 +40,7 @@ void Game::Draw() {
         }
     }
 
-    else if (game_state == PLAYING) {
+    if (game_state == PLAYING) {
         for (const auto& player : newPlayer) {
             player->Draw();
         }
@@ -57,12 +57,14 @@ void Game::Draw() {
             alien->Draw();
         }
     }
-    else if (game_state == GAMEOVER) {
+
+    if (game_state == GAMEOVER) {
         DrawText("Game Over", GetScreenWidth() / 2 -120, GetScreenHeight() / 2 - 100, 40, RED);
         PlayAgain();
     }
-    else if (game_state == GAMEWIN) {
+    if (game_state == GAMEWIN) {
         DrawText("You Win!", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
+        PlayAgain();
     }
 }
 
@@ -130,6 +132,18 @@ void Game::Update(float deltaTime) {
 
         if (newPlayer.empty()) {
             game_state = GAMEOVER;
+            newPlayer.clear();
+            newPlayer.push_back(std::make_unique<Player>());
+
+            aliens.clear();
+            for (int row = 0; row < 5; row++) {
+                for (int col = 0; col < 10; col++) {
+                    aliens.push_back(std::make_unique<Alien>(col * 40 + 50, row * 40 + 50));
+                }
+            }
+
+            alienBullets.clear();
+            playerBullets.clear();
         }
 
 
@@ -145,7 +159,16 @@ void Game::Update(float deltaTime) {
 
         if (enemyCount == 0) {
             DrawText("You Win!", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
-            game_state = GAMEOVER;
+            game_state = GAMEWIN;
+            aliens.clear();
+            for (int row = 0; row < 5; row++) {
+                for (int col = 0; col < 10; col++) {
+                    aliens.push_back(std::make_unique<Alien>(col * 40 + 50, row * 40 + 50));
+                }
+            }
+
+            alienBullets.clear();
+            playerBullets.clear();
         }
 
         std::cout << "Bullet count " << alienBullets.size() << std::endl;
