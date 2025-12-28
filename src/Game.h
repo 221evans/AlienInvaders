@@ -13,6 +13,14 @@
 #include "Player.h"
 #include "Bullet.h"
 
+
+enum GameState {
+    MENU,
+    PLAYING,
+    GAMEOVER,
+    GAMEWIN
+};
+
 class Game {
 public:
     Game();
@@ -20,10 +28,9 @@ public:
     std::vector<std::unique_ptr<Bullet>> playerBullets;
     std::vector<std::unique_ptr<Bullet>> alienBullets;
     std::vector<std::unique_ptr<Alien>> aliens;
-    void Draw() const;
+    void Draw();
     void Update(float deltaTime);
-    Music themeSound{};
-    Sound hitSound;
+
     float alienDirection;
     ~Game();
 
@@ -31,11 +38,18 @@ private:
     void UpdateAlien(float deltaTime);
     void HandleDeletion();
     void HandleCollision() const;
+    void PlayAgain();
     float alienShootTime;
     float alienShootDelay;
     float playerShootTimer;
     float playerShootDelay;
     bool canPlayerShoot;
+
+    Music themeSound;
+    Sound hitSound;
+    Sound shootSound;
+
+    GameState game_state;
 };
 
 

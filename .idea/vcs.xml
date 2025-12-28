@@ -3,6 +3,5 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/raylib-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/emsdk" vcs="Git" />
   </component>
 </project>

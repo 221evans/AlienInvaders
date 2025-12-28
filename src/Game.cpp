@@ -3,22 +3,25 @@
 //
 
 #include "Game.h"
-
 #include <algorithm>
-
 #include "iostream"
 
-Game::Game() {
+#define RAYGUI_IMPLEMENTATION
+#include "../raygui.h"
 
+Game::Game() {
     InitAudioDevice();
     themeSound = LoadMusicStream("Assets/titlebattle.wav");
     hitSound = LoadSound("Assets/hit.wav");
+    shootSound = LoadSound("Assets/shoot.wav");
     alienDirection = 1.0f;
     alienShootTime = 0.0f;
     alienShootDelay = 1.0f;
     playerShootTimer = 0.0f;
     playerShootDelay = 1.0f;
     canPlayerShoot = true;
+    game_state = MENU;
+
 
     for (int row = 0; row < 5; row++) {
         for (int col = 0; col < 10; col++) {
@@ -29,111 +32,129 @@ Game::Game() {
     newPlayer.push_back(std::make_unique<Player>());
 }
 
-void Game::Draw() const {
+void Game::Draw() {
 
-    for (const auto& player : newPlayer) {
-        player->Draw();
+    if (game_state == MENU) {
+        if (GuiButton(Rectangle{GetScreenWidth() / 2.0f - 100, 200, 120, 40}, "Start Game")) {
+            game_state = PLAYING;
+        }
     }
 
-    for (const auto& bullet : playerBullets) {
-        bullet->Draw(WHITE);
-    }
+    else if (game_state == PLAYING) {
+        for (const auto& player : newPlayer) {
+            player->Draw();
+        }
 
-    for (const auto& bullet : alienBullets) {
-        bullet->Draw(RED);
-    }
+        for (const auto& bullet : playerBullets) {
+            bullet->Draw(WHITE);
+        }
 
-    for (const auto& alien : aliens) {
-        alien->Draw();
+        for (const auto& bullet : alienBullets) {
+            bullet->Draw(RED);
+        }
+
+        for (const auto& alien : aliens) {
+            alien->Draw();
+        }
+    }
+    else if (game_state == GAMEOVER) {
+        DrawText("Game Over", GetScreenWidth() / 2 -120, GetScreenHeight() / 2 - 100, 40, RED);
+        PlayAgain();
+    }
+    else if (game_state == GAMEWIN) {
+        DrawText("You Win!", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
     }
 }
 
 void Game::Update(float deltaTime) {
 
-    UpdateAlien(deltaTime);
-
-    alienShootTime += deltaTime;
-    if (alienShootTime >= alienShootDelay) {
-        alienShootTime = 0.0f;
-
-
-        if (!aliens.empty()) {
-            int randomIndex = GetRandomValue(0, aliens.size() - 1);
-            alienBullets.push_back(std::make_unique<Bullet>(
-                aliens[randomIndex]->posX,
-                aliens[randomIndex]->posY,
-                1.0f
-                ));
-
-        }
+    if (game_state == MENU) {
 
     }
 
-    for (auto& player : newPlayer) {
-        DrawText(("Player Lives: " + std::to_string(player->lives)).c_str(), 10, 10, 20, RED );
-        player->Update(deltaTime);
+    if (game_state == PLAYING) {
 
-        if (IsKeyPressed(KEY_SPACE) && canPlayerShoot) {
+        UpdateAlien(deltaTime);
 
-            playerBullets.push_back(std::make_unique<Bullet>(player->posX, player->posY, -1.0f));
+        alienShootTime += deltaTime;
+        if (alienShootTime >= alienShootDelay) {
+            alienShootTime = 0.0f;
 
-            canPlayerShoot = false;
+            if (!aliens.empty()) {
+                int randomIndex = GetRandomValue(0, static_cast<int>(aliens.size() - 1));
+                alienBullets.push_back(std::make_unique<Bullet>(
+                    aliens[randomIndex]->posX,
+                    aliens[randomIndex]->posY,
+                    1.0f
+                    ));
+            }
+
         }
 
-        // player shoot timer
-        if (!canPlayerShoot) {
+        for (const auto& player : newPlayer) {
+            DrawText(("Player Lives: " + std::to_string(player->lives)).c_str(), 10, 10, 20, RED );
+            player->Update(deltaTime);
 
-            playerShootTimer += deltaTime;
+            if (IsKeyPressed(KEY_SPACE) && canPlayerShoot) {
 
-            if (playerShootTimer >= playerShootDelay) {
-                canPlayerShoot = true;
-                playerShootTimer = 0.0f;
+                playerBullets.push_back(std::make_unique<Bullet>(player->posX, player->posY, -1.0f));
+                PlaySound(shootSound);
+                canPlayerShoot = false;
+            }
+
+            // player shoot timer
+            if (!canPlayerShoot) {
+
+                playerShootTimer += deltaTime;
+
+                if (playerShootTimer >= playerShootDelay) {
+                    canPlayerShoot = true;
+                    playerShootTimer = 0.0f;
+                }
+            }
+
+            if (player->lives <= 0) {
+                player->isDead = true;
             }
         }
 
-
-
-        if (player->lives <= 0) {
-            player->isDead = true;
+        for (auto& bullet : playerBullets) {
+            bullet->Update(deltaTime);
         }
+
+        for (auto& bullet : alienBullets) {
+            bullet->Update(deltaTime);
+        }
+
+        HandleCollision();
+
+        if (newPlayer.empty()) {
+            game_state = GAMEOVER;
+        }
+
+
+        if (!IsMusicStreamPlaying(themeSound)) {
+            PlayMusicStream(themeSound);
+        }
+
+
+        UpdateMusicStream(themeSound);
+        HandleDeletion();
+
+        unsigned enemyCount = aliens.size();
+
+        if (enemyCount == 0) {
+            DrawText("You Win!", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
+            game_state = GAMEOVER;
+        }
+
+        std::cout << "Bullet count " << alienBullets.size() << std::endl;
     }
 
-    for (auto& bullet : playerBullets) {
-        bullet->Update(deltaTime);
+    else if (game_state == GAMEOVER) {
+
     }
 
-    for (auto& bullet : alienBullets) {
-        bullet->Update(deltaTime);
-    }
-
-    HandleCollision();
-
-    if (newPlayer.empty()) {
-        DrawText("Game Over", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
-    }
-
-
-    if (!IsMusicStreamPlaying(themeSound)) {
-        PlayMusicStream(themeSound);
-    }
-
-
-    UpdateMusicStream(themeSound);
-    HandleDeletion();
-
-    unsigned enemyCount = aliens.size();
-
-    if (enemyCount == 0) {
-        DrawText("You Win!", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
-    }
-
-    std::cout << "Bullet count " << alienBullets.size() << std::endl;
-}
-
-
-Game::~Game() {
-    UnloadMusicStream(themeSound);
-    UnloadSound(hitSound);
 }
 
 void Game::UpdateAlien(float deltaTime) {
@@ -195,4 +216,16 @@ void Game::HandleCollision() const {
             }
         }
     }
+}
+
+void Game::PlayAgain() {
+    if (GuiButton(Rectangle{GetScreenWidth() / 2.0f - 60, 200, 120, 40}, "Play Again")) {
+        game_state = PLAYING;
+    }
+}
+
+Game::~Game() {
+    UnloadMusicStream(themeSound);
+    UnloadSound(hitSound);
+    UnloadSound(shootSound);
 }
