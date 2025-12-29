@@ -4,7 +4,7 @@ int main() {
     int windowWidth = 640;
     int windowHeight = 480;
 
-    InitWindow(windowWidth, windowHeight, "Space invaders clone");
+    InitWindow(windowWidth, windowHeight, "Alien Invaders");
 
     Game game;
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.0)
-project(ToyBoxJam)
+project(AlienInvaders)
 
 set(CMAKE_CXX_STANDARD 26)
 
@@ -17,7 +17,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(raylib)
 FetchContent_MakeAvailable(raygui)
 
-add_executable(ToyBoxJam main.cpp
+add_executable(AlienInvaders main.cpp
         src/Player.cpp
         src/Player.h
         src/Game.cpp
@@ -28,20 +28,32 @@ add_executable(ToyBoxJam main.cpp
         src/Bullet.h)
 
 # Copy Assets folder to build directory
-add_custom_command(TARGET ToyBoxJam POST_BUILD
+add_custom_command(TARGET AlienInvaders POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/Assets
-        $<TARGET_FILE_DIR:ToyBoxJam>/Assets)
+        $<TARGET_FILE_DIR:AlienInvaders>/Assets)
 
 
 
-target_link_libraries(ToyBoxJam PRIVATE raylib)
+target_link_libraries(AlienInvaders PRIVATE raylib)
 
-# For Windows, copy raylib DLL to build directory
-if(WIN32)
-    add_custom_command(TARGET ToyBoxJam POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:raylib>
-            $<TARGET_FILE_DIR:ToyBoxJam>
+set(DIST_DIR "${CMAKE_SOURCE_DIR}/dist")
+
+if (WIN32 AND MINGW)
+    get_filename_component(MINGW_BIN_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+
+    add_custom_command(TARGET AlienInvaders POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E rm -rf "${DIST_DIR}"
+            COMMAND ${CMAKE_COMMAND} -E make_directory "${DIST_DIR}"
+            COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:AlienInvaders>" "${DIST_DIR}"
+            COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/Assets" "${DIST_DIR}/Assets"
     )
+
+    foreach(dll IN ITEMS libwinpthread-1.dll libstdc++-6.dll libgcc_s_seh-1.dll)
+        add_custom_command(TARGET AlienInvaders POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${MINGW_BIN_DIR}/${dll}"
+                "${DIST_DIR}"
+        )
+    endforeach()
 endif()

@@ -38,6 +38,8 @@ void Game::Draw() {
         if (GuiButton(Rectangle{GetScreenWidth() / 2.0f - 100, 200, 120, 40}, "Start Game")) {
             game_state = PLAYING;
         }
+
+        DrawText("Move with A and D Shoot with SPACE", GetScreenWidth() / 2 - 200, GetScreenHeight() / 2 + 50, 20, YELLOW);
     }
 
     if (game_state == PLAYING) {
@@ -132,16 +134,8 @@ void Game::Update(float deltaTime) {
 
         if (newPlayer.empty()) {
             game_state = GAMEOVER;
+
             newPlayer.clear();
-            newPlayer.push_back(std::make_unique<Player>());
-
-            aliens.clear();
-            for (int row = 0; row < 5; row++) {
-                for (int col = 0; col < 10; col++) {
-                    aliens.push_back(std::make_unique<Alien>(col * 40 + 50, row * 40 + 50));
-                }
-            }
-
             alienBullets.clear();
             playerBullets.clear();
         }
@@ -158,17 +152,11 @@ void Game::Update(float deltaTime) {
         unsigned enemyCount = aliens.size();
 
         if (enemyCount == 0) {
-            DrawText("You Win!", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
             game_state = GAMEWIN;
             aliens.clear();
-            for (int row = 0; row < 5; row++) {
-                for (int col = 0; col < 10; col++) {
-                    aliens.push_back(std::make_unique<Alien>(col * 40 + 50, row * 40 + 50));
-                }
-            }
-
             alienBullets.clear();
             playerBullets.clear();
+            newPlayer.clear();
         }
 
         std::cout << "Bullet count " << alienBullets.size() << std::endl;
@@ -187,13 +175,12 @@ void Game::UpdateAlien(float deltaTime) {
     }
 
     const bool hitEdge = std::ranges::any_of(aliens, [](const auto& alien) {
-      return alien->posX <= 10 || alien->posX >= GetScreenWidth() - 40;
+      return alien->posX <= 20.0 || alien->posX >= GetScreenWidth() - 10.0;
   });
 
     if (hitEdge) {
         alienDirection *= -1;
     }
-
 }
 
 void Game::HandleDeletion() {
@@ -242,7 +229,19 @@ void Game::HandleCollision() const {
 }
 
 void Game::PlayAgain() {
+
     if (GuiButton(Rectangle{GetScreenWidth() / 2.0f - 60, 200, 120, 40}, "Play Again")) {
+
+        aliens.clear();
+
+        for (int row = 0; row < 5; row++) {
+            for (int col = 0; col < 10; col++) {
+                aliens.push_back(std::make_unique<Alien>(col * 40 + 50, row * 40 + 50));
+            }
+        }
+
+        newPlayer.push_back(std::make_unique<Player>());
+
         game_state = PLAYING;
     }
 }
