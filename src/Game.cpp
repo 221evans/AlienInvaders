@@ -72,10 +72,6 @@ void Game::Draw() {
 
 void Game::Update(float deltaTime) {
 
-    if (game_state == MENU) {
-
-    }
-
     if (game_state == PLAYING) {
 
         UpdateAlien(deltaTime);
@@ -158,14 +154,7 @@ void Game::Update(float deltaTime) {
             playerBullets.clear();
             newPlayer.clear();
         }
-
-        std::cout << "Bullet count " << alienBullets.size() << std::endl;
     }
-
-    else if (game_state == GAMEOVER) {
-
-    }
-
 }
 
 void Game::UpdateAlien(float deltaTime) {
