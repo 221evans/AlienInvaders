@@ -1,6 +1,16 @@
 #include <raylib.h>
 #include "src/Game.h"
+
+#ifdef __APPLE__
+void SetMacAppWorkingDirectoryToResources();
+#endif
+
 int main() {
+
+#ifdef __APPLE__
+    SetMacAppWorkingDirectoryToResources();
+#endif
+
     int windowWidth = 640;
     int windowHeight = 480;
 

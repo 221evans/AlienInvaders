@@ -17,7 +17,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(raylib)
 FetchContent_MakeAvailable(raygui)
 
-add_executable(AlienInvaders main.cpp
+add_executable(AlienInvaders MACOSX_BUNDLE
+        main.cpp
         src/Player.cpp
         src/Player.h
         src/Game.cpp
@@ -25,14 +26,8 @@ add_executable(AlienInvaders main.cpp
         src/Alien.cpp
         src/Alien.h
         src/Bullet.cpp
-        src/Bullet.h)
-
-# Copy Assets folder to build directory
-add_custom_command(TARGET AlienInvaders POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/Assets
-        $<TARGET_FILE_DIR:AlienInvaders>/Assets)
-
+        src/Bullet.h
+        src/MacBundlePaths.mm)
 
 
 target_link_libraries(AlienInvaders PRIVATE raylib)
@@ -56,4 +51,14 @@ if (WIN32 AND MINGW)
                 "${DIST_DIR}"
         )
     endforeach()
+endif()
+
+if(APPLE)
+    target_link_libraries(AlienInvaders PRIVATE "-framework CoreFoundation")
+
+    add_custom_command(TARGET AlienInvaders POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/Assets"
+            "$<TARGET_BUNDLE_CONTENT_DIR:AlienInvaders>/Resources/Assets"
+    )
 endif()
