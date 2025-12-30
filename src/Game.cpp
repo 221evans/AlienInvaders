@@ -61,11 +61,11 @@ void Game::Draw() {
     }
 
     if (game_state == GAMEOVER) {
-        DrawText("Game Over", GetScreenWidth() / 2 -120, GetScreenHeight() / 2 - 100, 40, RED);
+        DrawText("Game Over", GetScreenWidth() / 2 - 120, GetScreenHeight() / 2 - 100, 40, RED);
         PlayAgain();
     }
     if (game_state == GAMEWIN) {
-        DrawText("You Win!", GetScreenWidth() / 2, GetScreenHeight() / 2, 40, RED);
+        DrawText("You Win!", GetScreenWidth() / 2 - 100, GetScreenHeight() / 2 - 100, 40, RED);
         PlayAgain();
     }
 }
@@ -224,7 +224,7 @@ void Game::HandleCollision() const {
 
 void Game::PlayAgain() {
 
-    if (GuiButton(Rectangle{GetScreenWidth() / 2.0f - 60, 200, 120, 40}, "Play Again")) {
+    if (GuiButton(Rectangle{GetScreenWidth() / 2.0f - 80, 200, 120, 40}, "Play Again")) {
 
         aliens.clear();
 
