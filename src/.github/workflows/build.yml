@@ -23,7 +23,7 @@ jobs:
         with:
           name: AlienInvaders-windows
           path: |
-            build/Release/AlienInvaders.exe
+            build/**/*.exe
             dist/**
           if-no-files-found: error
 
