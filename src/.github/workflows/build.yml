@@ -10,13 +10,12 @@ jobs:
     name: Windows (Release)
     runs-on: windows-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Configure (CMake)
+      - name: Configure
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
-      - name: Build
+      - name: Build (Release)
         run: cmake --build build --config Release -j
 
       - name: Upload artifact
@@ -24,10 +23,9 @@ jobs:
         with:
           name: AlienInvaders-windows
           path: |
-            build/AlienInvaders.exe
             build/Release/AlienInvaders.exe
             dist/**
-          if-no-files-found: warn
+          if-no-files-found: error
 
   web:
     name: Web (Emscripten Release)
