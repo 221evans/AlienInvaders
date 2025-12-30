@@ -5,7 +5,7 @@
 #include "Game.h"
 #include <algorithm>
 #include "iostream"
-
+#include <string>
 #define RAYGUI_IMPLEMENTATION
 #include "../raygui.h"
 
