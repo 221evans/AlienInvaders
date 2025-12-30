@@ -169,6 +169,11 @@ void Game::UpdateAlien(float deltaTime) {
 
     if (hitEdge) {
         alienDirection *= -1;
+
+        // Move all aliens away from edge
+        for (auto& alien : aliens) {
+            alien->posX += alienDirection * 5.0f;  // Push them back from edge
+        }
     }
 }
 
